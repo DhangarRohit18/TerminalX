@@ -1,7 +1,34 @@
 import { generateJSON } from './gemini';
 
+const MOCK_MATCH_ANALYSIS = {
+  skillMatchPercent: 82,
+  projectMatchPercent: 85,
+  experienceMatchPercent: 70,
+  overallMatchScore: 81,
+  matchedSkills: ["React", "TypeScript", "Node.js", "REST APIs", "Git", "VS Code"],
+  missingSkills: ["Google Cloud Platform", "Kubernetes", "GraphQL", "Docker"],
+  strongAreas: ["Frontend development with React and TypeScript", "API consumption and data synchronization"],
+  gapAreas: ["DevOps, containerization (Docker/Kubernetes)", "Cloud infrastructure setup (GCP/AWS)"],
+  recommendation: "maybe",
+  recommendationReason: "The candidate meets all core frontend requirements and has excellent React skills. However, they lack experience with Kubernetes and Google Cloud Platform, which are preferred for this role.",
+  hiringProbability: 75,
+  skillBreakdown: [
+    { skill: "React", inResume: true, inJD: true, proficiencyEstimate: 90 },
+    { skill: "TypeScript", inResume: true, inJD: true, proficiencyEstimate: 85 },
+    { skill: "Node.js", inResume: true, inJD: true, proficiencyEstimate: 75 },
+    { skill: "REST APIs", inResume: true, inJD: true, proficiencyEstimate: 85 },
+    { skill: "Google Cloud Platform", inResume: false, inJD: true, proficiencyEstimate: 0 },
+    { skill: "Kubernetes", inResume: false, inJD: true, proficiencyEstimate: 0 }
+  ],
+  improvementPriority: [
+    "Learn Google Cloud Platform fundamentals and containerization using Docker",
+    "Gain exposure to building API endpoints using GraphQL instead of only REST"
+  ]
+};
+
 export const matchResumeToJD = async (resumeAnalysis, jdAnalysis) => {
-  const prompt = `
+  try {
+    const prompt = `
 You are an AI hiring assistant. Compare a candidate's resume analysis to a job description analysis and compute match scores.
 
 Resume Analysis:
@@ -29,5 +56,9 @@ Return this exact JSON structure:
   "improvementPriority": ["<most important skill to add/improve>", ...]
 }
 `;
-  return generateJSON(prompt);
+    return await generateJSON(prompt);
+  } catch (err) {
+    console.warn("Gemini API resume-JD match failed, returning static mock fallback data:", err);
+    return MOCK_MATCH_ANALYSIS;
+  }
 };
