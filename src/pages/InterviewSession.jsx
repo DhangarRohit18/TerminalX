@@ -115,8 +115,7 @@ export default function InterviewSession() {
 
       // Save to Firestore
       if (user) {
-        await saveAnswer({ uid: user.uid, interviewId: id, questionId: q.id, question: q.question, answer: userAnswer, timeTaken: timer.timeTaken });
-        await saveEvaluation({ uid: user.uid, interviewId: id, questionId: q.id, ...finalEv });
+        await saveAnswer({ uid: user.uid, interviewId: id, questionId: q.id, question: q.question, answer: userAnswer, timeTaken: timer.timeTaken, ...finalEv });
       }
       setPhase('result');
     } catch (err) {
