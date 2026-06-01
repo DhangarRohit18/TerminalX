@@ -49,9 +49,10 @@ export const saveResume = async (uid, data) => {
 };
 
 export const getResumes = async (uid) => {
-  const q = query(collection(db, 'resumes'), where('uid', '==', uid), orderBy('createdAt', 'desc'), limit(5));
+  const q = query(collection(db, 'resumes'), where('uid', '==', uid));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 5);
 };
 
 export const getLatestResume = async (uid) => {
@@ -68,9 +69,10 @@ export const saveJobDescription = async (uid, data) => {
 };
 
 export const getJobDescriptions = async (uid) => {
-  const q = query(collection(db, 'jobDescriptions'), where('uid', '==', uid), orderBy('createdAt', 'desc'), limit(5));
+  const q = query(collection(db, 'jobDescriptions'), where('uid', '==', uid));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 5);
 };
 
 /* ── Interviews ──────────────────────────────────────────────── */
@@ -96,9 +98,10 @@ export const getInterview = async (id) => {
 };
 
 export const getUserInterviews = async (uid, limitN = 10) => {
-  const q = query(collection(db, 'interviews'), where('uid', '==', uid), orderBy('createdAt', 'desc'), limit(limitN));
+  const q = query(collection(db, 'interviews'), where('uid', '==', uid));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, limitN);
 };
 
 /* ── Answers ─────────────────────────────────────────────────── */
@@ -110,9 +113,10 @@ export const saveAnswer = async (data) => {
 };
 
 export const getInterviewAnswers = async (interviewId) => {
-  const q = query(collection(db, 'answers'), where('interviewId', '==', interviewId), orderBy('createdAt', 'asc'));
+  const q = query(collection(db, 'answers'), where('interviewId', '==', interviewId));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return list.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
 };
 
 /* ── Evaluations ─────────────────────────────────────────────── */
@@ -132,9 +136,10 @@ export const saveAnalytics = async (uid, data) => {
 };
 
 export const getUserAnalytics = async (uid) => {
-  const q = query(collection(db, 'analytics'), where('uid', '==', uid), orderBy('createdAt', 'desc'), limit(30));
+  const q = query(collection(db, 'analytics'), where('uid', '==', uid));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 30);
 };
 
 /* ── Reports ─────────────────────────────────────────────────── */
