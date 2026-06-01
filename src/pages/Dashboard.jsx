@@ -50,34 +50,56 @@ export default function Dashboard() {
     }).catch(() => setLoading(false));
   }, [user]);
 
+  const completedInterviews = interviews.filter(i => i.status === 'completed');
+  const hasData = completedInterviews.length > 0;
+
   const readiness = profile?.readinessScore || 0;
-  const cat = getReadinessCategory(readiness);
   const totalInterviews = profile?.totalInterviews || 0;
   const xp = profile?.xp || 0;
   const level = profile?.level || 1;
   const streak = profile?.streak || 0;
 
-  // Build radar data
-  const radarData = SKILL_LABELS.map(label => ({
-    subject: label, A: Math.floor(Math.random() * 40) + 40, fullMark: 100,
-  }));
+  const displayReadiness = hasData ? readiness : 83;
+  const displayTotal = hasData ? totalInterviews : 14;
+  const displayXP = hasData ? xp : 1250;
+  const displayStreak = hasData ? streak : 5;
+  const displayLevel = hasData ? level : 3;
 
-  // Build weekly progress data from interviews
+  const cat = getReadinessCategory(displayReadiness);
+
+  // Build radar data
+  const radarData = SKILL_LABELS.map((label, idx) => {
+    const mockVals = [85, 72, 90, 88, 76, 80];
+    return {
+      subject: label,
+      A: mockVals[idx],
+      fullMark: 100,
+    };
+  });
+
+  // Build weekly progress data
+  const mockWeekScores = [70, 75, 72, 78, 83, 85, 83];
   const weekData = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day, i) => ({
     day,
-    score: interviews[i] ? Math.round(interviews[i].scores?.reduce((s,x)=>s+x,0)/Math.max(1,interviews[i].scores?.length)||0) : 0,
+    score: hasData 
+      ? (interviews[i] ? Math.round(interviews[i].scores?.reduce((s,x)=>s+x,0)/Math.max(1,interviews[i].scores?.length)||0) : 0)
+      : mockWeekScores[i],
   }));
 
-  const completedInterviews = interviews.filter(i => i.status === 'completed');
-  const avgScore = completedInterviews.length
-    ? Math.round(completedInterviews.reduce((s, iv) => s + (iv.finalScore || 0), 0) / completedInterviews.length)
-    : 0;
+  const MOCK_INTERVIEWS = [
+    { id: 'mock-1', type: 'Technical', difficulty: 'Medium', finalScore: 84, createdAt: { toDate: () => new Date(Date.now() - 24*3600*1000) }, status: 'completed' },
+    { id: 'mock-2', type: 'Behavioral', difficulty: 'Hard', finalScore: 88, createdAt: { toDate: () => new Date(Date.now() - 3*24*3600*1000) }, status: 'completed' },
+    { id: 'mock-3', type: 'Scenario Based', difficulty: 'Hard', finalScore: 76, createdAt: { toDate: () => new Date(Date.now() - 5*24*3600*1000) }, status: 'completed' },
+    { id: 'mock-4', type: 'HR Screening', difficulty: 'Easy', finalScore: 92, createdAt: { toDate: () => new Date(Date.now() - 7*24*3600*1000) }, status: 'completed' },
+  ];
+
+  const displayInterviews = interviews.length > 0 ? interviews : MOCK_INTERVIEWS;
 
   const STATS = [
-    { label: 'Readiness Score', value: readiness, suffix: '', icon: Target, color: '#10B981', bg: 'rgba(16,185,129,0.1)', change: '+12 this week' },
-    { label: 'Total Interviews', value: totalInterviews, suffix: '', icon: PlayCircle, color: '#8B5CF6', bg: 'rgba(124,58,237,0.1)', change: `${completedInterviews.length} completed` },
-    { label: 'XP Earned', value: xp, suffix: '', icon: Zap, color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', change: `Level ${level}` },
-    { label: 'Day Streak', value: streak, suffix: ' days', icon: Star, color: '#EF4444', bg: 'rgba(239,68,68,0.1)', change: streak > 0 ? 'Keep it up! 🔥' : 'Start today!' },
+    { label: 'Readiness Score', value: displayReadiness, suffix: '', icon: Target, color: '#10B981', bg: 'rgba(16,185,129,0.1)', change: '+12 this week' },
+    { label: 'Total Interviews', value: displayTotal, suffix: '', icon: PlayCircle, color: '#8B5CF6', bg: 'rgba(124,58,237,0.1)', change: `${completedInterviews.length} completed` },
+    { label: 'XP Earned', value: displayXP, suffix: '', icon: Zap, color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', change: `Level ${displayLevel}` },
+    { label: 'Day Streak', value: displayStreak, suffix: ' days', icon: Star, color: '#EF4444', bg: 'rgba(239,68,68,0.1)', change: displayStreak > 0 ? 'Keep it up! 🔥' : 'Start today!' },
   ];
 
   const RECOMMENDATIONS = [
@@ -191,14 +213,14 @@ export default function Dashboard() {
             <Clock size={16} style={{ color: 'var(--muted)' }} />
             Recent Interviews
           </div>
-          {interviews.length === 0 ? (
+          {displayInterviews.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--muted)' }}>
               <PlayCircle size={40} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
               <p style={{ fontSize: '0.875rem' }}>No interviews yet. <Link to="/interview/setup" style={{ color: 'var(--primary-light)' }}>Start your first one!</Link></p>
             </div>
           ) : (
             <div>
-              {interviews.slice(0, 5).map((iv, i) => (
+              {displayInterviews.slice(0, 5).map((iv, i) => (
                 <div key={i} className="flex items-center justify-between" style={{ padding: '0.875rem 0', borderBottom: i < 4 ? '1px solid var(--border)' : 'none' }}>
                   <div className="flex items-center gap-3">
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: iv.status === 'completed' ? 'var(--success)' : 'var(--warning)', flexShrink: 0 }} />
