@@ -60,6 +60,39 @@ export default function Auth() {
     finally { setLoading(false); }
   };
 
+  const handleDemoLogin = async (role) => {
+    setLoading(true);
+    const email = role === 'recruiter' ? 'recruiter@interviewiq.ai' : 'candidate@interviewiq.ai';
+    const name = role === 'recruiter' ? 'Demo Recruiter' : 'Demo Candidate';
+    const password = 'password123';
+
+    try {
+      await signInWithEmail(email, password);
+      toast.success(`Welcome back, ${name}!`);
+      navigate(role === 'recruiter' ? '/recruiter' : '/dashboard');
+    } catch (err) {
+      // Fallback: create the user if they do not exist
+      if (
+        err.code === 'auth/user-not-found' || 
+        err.code === 'auth/invalid-credential' ||
+        err.message?.includes('user-not-found') ||
+        err.message?.includes('INVALID_LOGIN_CREDENTIALS')
+      ) {
+        try {
+          await signUpWithEmail(email, password, name);
+          toast.success(`Demo account created! Welcome ${name}.`);
+          navigate(role === 'recruiter' ? '/recruiter' : '/dashboard');
+        } catch (regErr) {
+          toast.error(`Demo registration failed: ${regErr.message}`);
+        }
+      } else {
+        toast.error(`Demo login failed: ${err.message}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-bg" />
@@ -100,7 +133,15 @@ export default function Auth() {
               </svg>
               Continue with Google
             </button>
-            <div className="divider-text mb-4">or</div>
+            <div className="flex gap-3 mb-4">
+              <button type="button" className="btn btn-glass flex-1 flex items-center justify-center gap-2" style={{ fontSize: '0.8rem', padding: '0.625rem' }} onClick={() => handleDemoLogin('candidate')} disabled={loading}>
+                👤 Candidate Demo
+              </button>
+              <button type="button" className="btn btn-glass flex-1 flex items-center justify-center gap-2" style={{ fontSize: '0.8rem', padding: '0.625rem' }} onClick={() => handleDemoLogin('recruiter')} disabled={loading}>
+                💼 Recruiter Demo
+              </button>
+            </div>
+            <div className="divider-text mb-4">or use credentials</div>
           </>
         )}
 
