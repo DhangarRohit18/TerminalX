@@ -1,3 +1,4 @@
 {
+  "name": "interviewiq-ai",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
