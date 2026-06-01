@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && (resource == null || resource.data.uid == request.auth.uid);
+    }
+    
+    function isNewDocOwner() {
+      return isAuthenticated() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ── Users Collection ──────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuthenticated(); // Allow reading profiles for dashboard/leaderboard/recruiter views
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false; // Users cannot delete profiles directly
+    }
+
+    // ── Resumes Collection ────────────────────────────────────────
+    match /resumes/{resumeId} {
+      allow read: if isDocOwner();
+      allow create: if isNewDocOwner();
+      allow update: if isDocOwner() && isNewDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // ── Job Descriptions Collection ───────────────────────────────
+    match /jobDescriptions/{jdId} {
+      allow read: if isDocOwner();
+      allow create: if isNewDocOwner();
+      allow update: if isDocOwner() && isNewDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // ── Interviews Collection ─────────────────────────────────────
+    match /interviews/{interviewId} {
+      // Allow recruiters to read interviews for hiring analytics, or the owner
+      allow read: if isAuthenticated();
+      allow create: if isNewDocOwner();
+      allow update: if isDocOwner() && isNewDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // ── Answers Collection ────────────────────────────────────────
+    match /answers/{answerId} {
+      // Allow reading answers if authenticated
+      allow read: if isAuthenticated();
+      allow create: if isNewDocOwner();
+      allow update: if isDocOwner() && isNewDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // ── Analytics Collection ──────────────────────────────────────
+    match /analytics/{analyticsId} {
+      allow read: if isAuthenticated();
+      allow create: if isNewDocOwner();
+      allow update: if isDocOwner() && isNewDocOwner();
+      allow delete: if isDocOwner();
+    }
+
+    // ── Reports Collection ────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if isAuthenticated();
+      allow create: if isNewDocOwner();
+      allow update: if isDocOwner() && isNewDocOwner();
+      allow delete: if isDocOwner();
+    }
+  }
+}
