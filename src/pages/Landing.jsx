@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Play, ChevronDown, Star, Check, Zap, Brain, Target, TrendingUp, Shield, Award } from 'lucide-react';
+import { ArrowRight, Play, PlayCircle, ChevronDown, Star, Check, Zap, Brain, Target, TrendingUp, Shield, Award } from 'lucide-react';
 
 const FEATURES = [
   { icon: '🧠', title: 'Adaptive AI Engine', desc: 'Questions dynamically adjust in difficulty based on your live performance in real-time.', color: 'rgba(124,58,237,0.15)', border: 'rgba(124,58,237,0.3)' },
